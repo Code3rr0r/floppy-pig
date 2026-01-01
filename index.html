@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floppy Pig Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a1c4fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Main Content */
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        /* Game Container */
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #gameContainer::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+        
+        #gameContainer::after {
+            content: "";
+            position: absolute;
+            bottom: -60px;
+            left: -40px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+        
+        canvas {
+            border: 3px solid #4a5568;
+            border-radius: 12px;
+            display: block;
+            margin: 20px auto;
+            background: #87CEEB;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        #score {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            display: inline-block;
+            min-width: 180px;
+        }
+        
+        #gameOver {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 240, 240, 0.9);
+            border-radius: 15px;
+            border: 2px solid #fed7d7;
+        }
+        
+        #gameOver h2 {
+            color: #e53e3e;
+            margin-bottom: 15px;
+            font-size: 2rem;
+        }
+        
+        #finalScore {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin: 10px 0 20px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+            background: linear-gradient(to right, #45a049, #3d8b40);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #instructions {
+            margin: 15px 0;
+            color: #4a5568;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            display: inline-block;
+        }
+        
+        /* Info Panel */
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            color: #2d3748;
+        }
+        
+        .info-panel h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #4a5568;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature i {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .instructions-list {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .instructions-list h3 {
+            margin-bottom: 15px;
+            color: #2d3748;
+            text-align: center;
+        }
+        
+        .instructions-list ul {
+            padding-left: 20px;
+            list-style-type: none;
+        }
+        
+        .instructions-list li {
+            margin: 12px 0;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .instructions-list li:before {
+            content: "🐷";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            width: 100%;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            .logo {
+                font-size: 3.5rem;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .logo {
+                font-size: 2.8rem;
+            }
+            
+            #score {
+                font-size: 24px;
+                min-width: 160px;
+            }
+            
+            canvas {
+                width: 95%;
+                height: auto;
+            }
+        }
+        
+        /* Animation for pig */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating-pig {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🐷</div>
+            <h1>Floppy Pig Game</h1>
+            <p class="subtitle">A delightful twist on the classic flappy game! Guide our adorable pig through the pipes with perfect timing.</p>
+        </header>
+        
+        <div class="content">
+            <div id="gameContainer">
+                <div id="instructions">Click, tap or press SPACE to flap!</div>
+                <div id="score">Score: 0</div>
+                <canvas id="gameCanvas" width="400" height="600"></canvas>
+                <div id="gameOver">
+                    <h2>Game Over!</h2>
+                    <p id="finalScore"></p>
+                    <button onclick="resetGame()">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2>About Floppy Pig</h2>
+                <p style="text-align: center; line-height: 1.6; margin-bottom: 25px;">
+                    Help our pink friend navigate through the green pipes! The game gets progressively harder as your score increases.
+                </p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>Mobile Friendly</h3>
+                        <p>Play anywhere with touch support</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Optimized</h3>
+                        <p>Smooth performance on all devices</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-piggy-bank"></i>
+                        <h3>Adorable</h3>
+                        <p>Meet your new favorite gaming pig!</p>
+                    </div>
+                </div>
+                
+                <div class="instructions-list">
+                    <h3>How to Play</h3>
+                    <ul>
+                        <li>Press SPACE, CLICK, or TAP to make the pig flap</li>
+                        <li>Navigate through the pipes without hitting them</li>
+                        <li>Each pipe passed earns you 1 point</li>
+                        <li>Try to beat your high score!</li>
+                        <li>Game gets faster as your score increases</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+            <p>© 2026 Floppy Pig Game | Made with ❤️ for pig lovers everywhere</p>
+            <p style="margin-top: 5px;">All rights reserved. This game is a fan creation and not affiliated with any official pig organization.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Game script with all improvements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game variables
+        let pig = {
+            x: 100,
+            y: canvas.height / 2,
+            width: 40,
+            height: 30,
+            velocity: 0,
+            gravity: 0.5,
+            jumpPower: -8
+        };
+        
+        let pipes = [];
+        let score = 0;
+        let gameRunning = true;
+        let frameCount = 0;
+        let highScore = localStorage.getItem('floppyPigHighScore') || 0;
+        
+        // Pipe settings
+        const pipeWidth = 80;
+        const pipeGap = 150;
+        let pipeSpeed = 2;
+        const pipeSpawnInterval = 100;
+        
+        // Input buffering
+        let jumpBuffer = 0;
+        const JUMP_BUFFER_FRAMES = 3;
+        
+        // Cloud caching
+        let cloudsCanvas = null;
+        let cloudsCtx = null;
+        const clouds = [
+            {x: 50, y: 100, width: 60, height: 30},
+            {x: 200, y: 150, width: 80, height: 40},
+            {x: 320, y: 80, width: 50, height: 25}
+        ];
+        
+        // Initialize cloud cache
+        function initCloudCache() {
+            cloudsCanvas = document.createElement('canvas');
+            cloudsCanvas.width = canvas.width || 400;
+            cloudsCanvas.height = canvas.height || 600;
+            
+            if (cloudsCanvas.width === 0 || cloudsCanvas.height === 0) {
+                cloudsCanvas.width = 400;
+                cloudsCanvas.height = 600;
+            }
+            
+            cloudsCtx = cloudsCanvas.getContext('2d');
+            cloudsCtx.fillStyle = 'white';
+            clouds.forEach(cloud => {
+                if (cloud.x + cloud.width <= cloudsCanvas.width && 
+                    cloud.y + cloud.height <= cloudsCanvas.height) {
+                    cloudsCtx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+                }
+            });
+        }
+        
+        // Create pipe
+        function createPipe() {
+            const minHeight = 100;
+            const maxHeight = canvas.height - pipeGap - minHeight;
+            const height = Math.random() * (maxHeight - minHeight) + minHeight;
+            
+            pipes.push({
+                x: canvas.width,
+                topHeight: height,
+                bottomY: height + pipeGap,
+                width: pipeWidth,
+                passed: false
+            });
+        }
+        
+        // Draw pig
+        function drawPig() {
+            ctx.save();
+            ctx.translate(pig.x + pig.width/2, pig.y + pig.height/2);
+            
+            // Draw tail first
+            ctx.strokeStyle = '#FFB6C1';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(pig.width/2 - 5, 0, 8, 0, Math.PI);
+            ctx.stroke();
+            
+            // Apply rotation
+            ctx.rotate(pig.velocity * 0.05);
+            
+            // Pig body
+            ctx.fillStyle = '#FFB6C1';
+            ctx.fillRect(-pig.width/2, -pig.height/2, pig.width, pig.height);
+            
+            // Pig ears
+            ctx.fillStyle = '#FF69B4';
+            ctx.fillRect(-15, -pig.height/2 - 8, 10, 15);
+            ctx.fillRect(5, -pig.height/2 - 8, 10, 15);
+            
+            // Pig snout
+            ctx.fillStyle = '#FF1493';
+            ctx.fillRect(-8, -5, 16, 10);
+            
+            // Pig eyes
+            ctx.fillStyle = 'black';
+            ctx.fillRect(-10, -pig.height/4, 4, 4);
+            ctx.fillRect(6, -pig.height/4, 4, 4);
+            
+            ctx.restore();
+        }
+        
+        // Draw pipes
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                ctx.fillStyle = '#228B22';
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, canvas.height - pipe.bottomY);
+                
+                ctx.fillStyle = '#32CD32';
+                ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipe.width + 10, 30);
+                ctx.fillRect(pipe.x - 5, pipe.bottomY, pipe.width + 10, 30);
+                
+                ctx.fillStyle = '#228B22';
+            });
+        }
+        
+        // Update game
+        function update() {
+            // Handle jump input buffering
+            if (jumpBuffer > 0) {
+                jumpBuffer--;
+                if (gameRunning) {
+                    pig.velocity = pig.jumpPower;
+                }
+            }
+            
+            if (!gameRunning) return;
+            
+            frameCount++;
+            
+            // Update pig
+            pig.velocity += pig.gravity;
+            pig.y += pig.velocity;
+            
+            // Increase difficulty
+            pipeSpeed = 2 + Math.floor(score / 5) * 0.3;
+            
+            // Create new pipes
+            if (frameCount % pipeSpawnInterval === 0) {
+                createPipe();
+            }
+            
+            // Update pipes
+            pipes.forEach(pipe => {
+                pipe.x -= pipeSpeed;
+                
+                if (!pipe.passed && pipe.x + pipe.width < pig.x) {
+                    pipe.passed = true;
+                    score++;
+                    document.getElementById('score').textContent = `Score: ${score}`;
+                    
+                    // Update high score
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('floppyPigHighScore', highScore);
+                    }
+                }
+            });
+            
+            // Remove off-screen pipes
+            pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+            
+            // Check collisions
+            checkCollisions();
+        }
+        
+        // Check collisions
+        function checkCollisions() {
+            // Ground and ceiling
+            if (pig.y <= 0 || pig.y + pig.height >= canvas.height) {
+                gameOver();
+                return;
+            }
+            
+            // Pipes
+            pipes.forEach(pipe => {
+                if (pig.x < pipe.x + pipe.width &&
+                    pig.x + pig.width > pipe.x &&
+                    (pig.y < pipe.topHeight || pig.y + pig.height > pipe.bottomY)) {
+                    gameOver();
+                }
+            });
+        }
+        
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').textContent = `Final Score: ${score} | High Score: ${highScore}`;
+        }
+        
+        // Reset game
+        function resetGame() {
+            pig.y = canvas.height / 2;
+            pig.velocity = 0;
+            pipes = [];
+            score = 0;
+            frameCount = 0;
+            jumpBuffer = 0;
+            gameRunning = true;
+            document.getElementById('score').textContent = 'Score: 0';
+            document.getElementById('gameOver').style.display = 'none';
+        }
+        
+        // Draw everything
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw cached clouds
+            if (cloudsCanvas) {
+                ctx.drawImage(cloudsCanvas, 0, 0);
+            }
+            
+            drawPipes();
+            drawPig();
+        }
+        
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Controls
+        function jump() {
+            if (gameRunning) {
+                pig.velocity = pig.jumpPower;
+            } else {
+                jumpBuffer = JUMP_BUFFER_FRAMES;
+            }
+        }
+        
+        canvas.addEventListener('click', jump);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            jump();
+        });
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // Initialize and start
+        initCloudCache();
+        gameLoop();
+        
+        // Add floating pig animation to title
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('h1');
+            const text = title.textContent;
+            title.innerHTML = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === ' ') {
+                    title.innerHTML += '&nbsp;';
+                } else {
+                    title.innerHTML += `<span class="floating-pig">${text[i]}</span>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+	
